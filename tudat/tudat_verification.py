@@ -1,3 +1,11 @@
+'''
+Script to verify the correct installation of tudatpy.
+This script performs a numerical propagation of the orbit of the Delfi-C3 satellite. 
+The same code can be found at: 
+https://docs.tudat.space/en/latest/_src_getting_started/_src_examples/notebooks/propagation/keplerian_satellite_orbit.html
+
+'''
+
 # Load standard modules
 import numpy as np
 from matplotlib import pyplot as plt
@@ -116,7 +124,6 @@ ax.plot(states_array[:, 1], states_array[:, 2], states_array[:, 3], label=bodies
 ax.scatter(0.0, 0.0, 0.0, label="Earth", marker='o', color='blue')
 
 # Add the legend and labels, then show the plot
-
 ax.legend()
 ax.set_xlabel('x [m]')
 ax.set_ylabel('y [m]')
