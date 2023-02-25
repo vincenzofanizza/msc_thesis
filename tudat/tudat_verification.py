@@ -116,6 +116,7 @@ ax.plot(states_array[:, 1], states_array[:, 2], states_array[:, 3], label=bodies
 ax.scatter(0.0, 0.0, 0.0, label="Earth", marker='o', color='blue')
 
 # Add the legend and labels, then show the plot
+
 ax.legend()
 ax.set_xlabel('x [m]')
 ax.set_ylabel('y [m]')
