@@ -49,7 +49,6 @@ def place_camera(location = None, rotation = None, rot_type = 'euler'):
     if rot_type == 'quaternion':
         # Quaternions are assumed in a scalar-first notation
         rotation = quat2eul(rotation)
-        print(rotation)
     elif rot_type != 'euler':
         raise ValueError('camera rotation type is unknown')
     
@@ -84,7 +83,7 @@ for i in range(len(camera_poses['location'])):
 
     # Setup rendering filepath
     scene.render.image_settings.file_format = 'PNG'
-    scene.render.filepath = "//pose_{num}.png".format(num = i+1)
+    scene.render.filepath = "//image_rendering_verification/pose_{num}.png".format(num = i+1)
 
     # Render
     bpy.ops.render.render(write_still = 1)
