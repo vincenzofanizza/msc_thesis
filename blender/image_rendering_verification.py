@@ -91,4 +91,3 @@ for i in range(len(camera_poses['location'])):
     bpy.ops.object.select_all(action = 'DESELECT')
     bpy.data.objects['Camera'].select_set(True)
     bpy.ops.object.delete() 
-
