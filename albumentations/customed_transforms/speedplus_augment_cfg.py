@@ -11,8 +11,8 @@ from __future__ import print_function
 import albumentations as A
 from albumentations.pytorch.transforms import ToTensorV2
 
-from randomsunflare import RandomSunFlare
-from coarsedropout  import CoarseDropout
+from .randomsunflare import RandomSunFlare
+from .coarsedropout  import CoarseDropout
 
 
 class SpeedplusAugmentCfg:
@@ -81,12 +81,11 @@ class SpeedplusAugmentCfg:
                 transforms += [RandomSunFlare(num_flare_circles_lower = 1,
                                             num_flare_circles_upper = 10,
                                             p = self.p)]
-
+            # TODO: include other domain-specific augmentations
         if to_tensor:
             # Normalize by ImageNet stats, then turn into tensor
             transforms += [A.Normalize(mean = (0.485, 0.456, 0.406), std = (0.229, 0.224, 0.225)),
                         ToTensorV2()]
-
         # Compose and return
         if load_labels:
             transforms = A.Compose(

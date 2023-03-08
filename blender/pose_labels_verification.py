@@ -5,14 +5,13 @@ import math
 import mathutils
 import sys
 import os
+import imp
 
 dir = os.path.dirname(bpy.data.filepath)
 if not dir in sys.path:
     sys.path.append(dir)
 
 import blender_utils as bu
-
-import imp
 imp.reload(bu)
 
 
