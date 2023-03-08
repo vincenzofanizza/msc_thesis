@@ -13,14 +13,13 @@ sys.path.append('../msc_thesis')
 import general_utils as gu
 
 
-# speedplus_folder = 'C:\\Users\\vinci\\OneDrive\\Desktop\\Thesis\\speedplusv2'
-input_image_folder = 'C:\\Users\\vinci\\OneDrive\\Desktop\\Thesis\\input'
-output_image_folder = 'C:\\Users\\vinci\\OneDrive\\Desktop\\Thesis\\output'
+speedplus_input_folder = 'C:\\Users\\vinci\\OneDrive\\Desktop\\Thesis\\speedplusv2'
+output_folder = 'C:\\Users\\vinci\\OneDrive\\Desktop\\Thesis\\speedplus_augmented'
 
 filename = 'image.jpg'
 
-input_filepath = os.path.join(input_image_folder, filename)
-output_filepath = os.path.join(output_image_folder, filename)
+input_filepath = os.path.join(speedplus_input_folder, filename)
+output_filepath = os.path.join(output_folder, filename)
 
 # Build transformations
 augment_cfg = SpeedplusAugmentCfg()

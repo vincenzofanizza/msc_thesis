@@ -81,7 +81,7 @@ class SpeedplusAugmentCfg:
                 transforms += [RandomSunFlare(num_flare_circles_lower = 1,
                                             num_flare_circles_upper = 10,
                                             p = self.p)]
-            # TODO: include other domain-specific augmentations
+            # TODO: include other augmentations (style randomisation, haze, stars, streaks, Earth background)
         if to_tensor:
             # Normalize by ImageNet stats, then turn into tensor
             transforms += [A.Normalize(mean = (0.485, 0.456, 0.406), std = (0.229, 0.224, 0.225)),
