@@ -1,7 +1,5 @@
 '''
-Copyright (c) 2022 SLAB Group
-Licensed under MIT License (see LICENSE.md)
-Author: Tae Ha Park (tpark94@stanford.edu)
+Code taken from the SPNv2 repository: https://github.com/tpark94/spnv2.
 
 '''
 from __future__ import absolute_import
@@ -36,6 +34,7 @@ class SpeedplusAugmentCfg:
 
         Args:
             augment_config (class): instance of the SpeedplusAugmentCfg class containing all relevant parameters about the augmentation pipeline.
+            to_tensor (bool): flag indicating whether or not the transform should convert the input image to a torch.Tensor object.
             is_train (bool): flag indicating whether the function is called for training or not.
             load_labels (bool): flag indicating whether the bounding box labels should be included in the transform or not.
         

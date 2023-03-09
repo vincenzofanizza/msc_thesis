@@ -1,3 +1,8 @@
+'''
+Script to verify Blender's rendering capabilities.
+
+'''
+
 import bpy
 
 import numpy as np

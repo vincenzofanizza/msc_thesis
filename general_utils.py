@@ -1,3 +1,7 @@
+'''
+Script containing general utilities.
+
+'''
 import pandas as pd
 import cv2
 
@@ -47,6 +51,7 @@ def save_image(image, filepath = None):
     '''
     if filepath:
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-        cv2.imwrite(filepath, image)
+        # NOTE: jpeg quality parameter added to preserve SPEED+ compression size when applying augmentations.
+        cv2.imwrite(filepath, image, [cv2.IMWRITE_JPEG_QUALITY, 75])
     else:
         raise ValueError('no path specified')    

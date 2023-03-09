@@ -1,3 +1,8 @@
+'''
+Script containing utilities to work in Blender.
+It is recommended to run this script using the Blender's Python console rather than from a terminal.
+
+'''
 import bpy
 
 import numpy as np

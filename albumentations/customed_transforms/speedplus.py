@@ -1,11 +1,13 @@
 '''
-Copyright (c) 2022 SLAB Group
-Licensed under MIT License (see LICENSE.md)
-Author: Tae Ha Park (tpark94@stanford.edu)
+Code adapted from the SPNv2 repository: https://github.com/tpark94/spnv2.
 
 '''
 import torch
 
 
-class SPEEDPLUSDataset(torch.utils.data.Dataset):
+class SpeedplusDataset(torch.utils.data.Dataset):
+    '''
+    Class for the SPEED+ dataset.
+
+    '''
     a = 1

@@ -1,13 +1,8 @@
 '''
-Code taken from the SPNv2 repository: https://github.com/tpark94/spnv2
+Code adapted from the SPNv2 repository: https://github.com/tpark94/spnv2.
 
-Copyright (c) 2022 SLAB Group
-Licensed under MIT License (see LICENSE.md)
-Author: Tae Ha Park (tpark94@stanford.edu)
-
-The function below is adopted from the Albumentation's official implementation
-of the class CoarseDropout. It is modified to accept the bounding box as an input
-to force the dropout regions within the prescribed bounding box.
+The function below is adopted from the Albumentation's official implementation of the class CoarseDropout. 
+It is modified to accept the bounding box as an input to force the dropout regions within the prescribed bounding box.
 
 '''
 from __future__ import absolute_import

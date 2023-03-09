@@ -1,3 +1,7 @@
+'''
+Script to verify the generation of pose labels.
+
+'''
 import bpy
 
 import numpy as np

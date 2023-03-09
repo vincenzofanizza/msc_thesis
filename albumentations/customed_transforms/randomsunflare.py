@@ -1,9 +1,5 @@
 '''
-Code taken from the SPNv2 repository: https://github.com/tpark94/spnv2
-
-Copyright (c) 2022 SLAB Group
-Licensed under MIT License (see LICENSE.md)
-Author: Tae Ha Park (tpark94@stanford.edu)
+Code adapted from the SPNv2 repository: https://github.com/tpark94/spnv2.
 
 The function below is adopted from the Albumentation's official implementation of the class RandomSunFlare. 
 It is modified to accept the bounding box as an input to force the sun flares within the prescribed bounding box.
