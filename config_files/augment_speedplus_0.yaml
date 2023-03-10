@@ -1,12 +1,12 @@
-ROOT: 'C:\\Users\\vinci\\OneDrive\\Desktop\\Thesis'
-OUTPUT_DIR: 'C:\\Users\\vinci\\OneDrive\\Desktop\\Thesis'
+ROOT: 'speedplus-dataset'
+OUTPUT_DIR: 'speedplus_augmented_0'
 DATASET:
-  ROOT: 'C:\\Users\\vinci\\OneDrive\\Desktop\\Thesis'
+  ROOT: 'speedplus-dataset'
   NAME: 'speedplusv2'
   CAMERA_FILE: 'camera.json'
 AUGMENTATIONS:
   NEW_DATASET_NAME: 'speedplus_augmented_0'
-  SAVE_DIR: 'C:\\Users\\vinci\\OneDrive\\Desktop\\Thesis'
+  SAVE_DIR: 'speedplus-dataset'
   P: 0.5
   BRIGHTNESS_AND_CONTRAST: True
   BLUR: True
