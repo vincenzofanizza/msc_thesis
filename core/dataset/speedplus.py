@@ -2,15 +2,11 @@
 Code taken from the SPNv2 repository: https://github.com/tpark94/spnv2.
 
 '''
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import albumentations as A
 from albumentations.pytorch.transforms import ToTensorV2
 
-from .randomsunflare import RandomSunFlare
-from .coarsedropout  import CoarseDropout
+from .customed_transforms.randomsunflare import RandomSunFlare
+from .customed_transforms.coarsedropout  import CoarseDropout
 
 
 class SpeedplusAugmentCfg:
@@ -90,7 +86,7 @@ class SpeedplusAugmentCfg:
             transforms = A.Compose(
                 transforms,
                 A.BboxParams(format = 'albumentations',       # [xmin, ymin, xmax, ymax] (normalized)
-                            label_fields = ['class_labels']) # Placeholder
+                            label_fields = ['class_labels'])  # Placeholder
             )
         else:
             transforms = A.Compose(
