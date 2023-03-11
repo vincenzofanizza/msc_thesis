@@ -1,5 +1,5 @@
 '''
-Code taken from the SPNv2 repository: https://github.com/tpark94/spnv2.
+Script containing classes and methods for the SPEED+ dataset.
 
 '''
 import albumentations as A
@@ -11,6 +11,8 @@ from .customed_transforms.coarsedropout  import CoarseDropout
 
 class SpeedplusAugmentCfg:
     '''
+    Code taken from the SPNv2 repository: https://github.com/tpark94/spnv2.
+
     Class that defines the SPEED+ augmentation configuration.
     
     '''

@@ -6,6 +6,9 @@ It generates a baseline augmented dataset and a set of datasets augmented with d
 import argparse
 import os
 import boto3
+import shutil
+
+from tqdm import tqdm
 
 import _add_root
 
@@ -36,18 +39,31 @@ def main(cfg):
     '''
     args = parse_args()
     update_config(cfg, args)
-    # TODO: adapt this function to S3
-    # create_speedplus_folder_struc(cfg)
 
-    # TODO: adapt this line to S3
-    # filenames = os.listdir(os.path.join(cfg.DATASET.SYNTHETIC_PATH, 'images'))
-    s3 = boto3.resource('s3')
-    s3_client = boto3.client('s3')
-    bucket = s3.Bucket('speedplus-dataset')
-    filenames = s3_client.list_objects(Bucket = cfg.DATASET.ROOT, Prefix = 'speedplus-demo/synthetic/images')
-    for my_bucket in bucket.objects.all():
-        print(my_bucket.key)
+    if cfg.PLATFORM != 'local' and cfg.PLATFORM != 'aws':
+        raise ValueError('platform selected in configuration file is not supported')
 
+    if cfg.PLATFORM == 'local':
+        create_speedplus_folder_struc(cfg)
+        synthetic_image_filenames = os.listdir(os.path.join(cfg.DATASET.SYNTHETIC_PATH, 'images').replace('\\', '/'))
+    elif cfg.PLATFORM == 'aws':
+        s3 = boto3.resource('s3')
+        s3_client = boto3.client('s3')
+
+        synthetic_image_objects = s3_client.list_objects_v2(Bucket = cfg.DATASET.ROOT, Prefix = os.path.join(cfg.DATASET.NAME, 'synthetic', 'images').replace('\\', '/'))
+        train_labels_src = {
+            'Bucket': cfg.AUGMENTATIONS.NEW_ROOT,
+            'Key': os.path.join(cfg.AUGMENTATIONS.NEW_DATASET_NAME, 'synthetic', 'test.json').replace('\\', '/')
+        }
+        valid_labels_src = {
+            'Bucket': cfg.AUGMENTATIONS.NEW_ROOT,
+            'Key': os.path.join(cfg.AUGMENTATIONS.NEW_DATASET_NAME, 'synthetic', 'validation.json').replace('\\', '/')
+        }
+        camera_file_src = {
+            'Bucket': cfg.AUGMENTATIONS.NEW_ROOT,
+            'Key': os.path.join(cfg.AUGMENTATIONS.NEW_DATASET_NAME, cfg.DATASET.CAMERA_FILE).replace('\\', '/')
+        }
+        
     # Build transformations
     augment_cfg = SpeedplusAugmentCfg(p = cfg.AUGMENTATIONS.P, 
                                     brightness_and_contrast = cfg.AUGMENTATIONS.BRIGHTNESS_AND_CONTRAST, 
@@ -57,25 +73,55 @@ def main(cfg):
                                     sun_flare = cfg.AUGMENTATIONS.SUN_FLARE)
     transforms = augment_cfg.build_transforms(is_train = True, to_tensor = False, load_labels = False)
 
-    for filename in filenames[:2]:
-        print(filename)
-
-        # Load images - first try with the local folder structure, then with an AWS S3 bucket
-        try:
-            input_filepath = os.path.join(cfg.DATASET.SYNTHETIC_PATH, 'images', filename)
+    if cfg.PLATFORM == 'local':
+        for filename, _ in zip(synthetic_image_filenames, tqdm(range(1, len(synthetic_image_filenames)), desc = 'augmenting synthetic images')):
+            # Load image
+            input_filepath = os.path.join(cfg.DATASET.ROOT, cfg.DATASET.NAME, 'synthetic', 'images', filename).replace('\\', '/')
             input_image = load_image(filepath = input_filepath)
-        except:
-            input_image = load_image_from_s3(cfg.DATASET.ROOT, os.path.join(cfg.DATASET.NAME, 'synthetic', 'images', filename))
 
-        # Apply transformations
-        transformed_image = transforms(image = input_image)['image']
+            # Apply transformations
+            transformed_image = transforms(image = input_image)['image']
 
-        # Save transformed image - first try with the local folder structure, then with an AWS S3 bucket
-        try:
-            output_filepath = os.path.join(cfg.AUGMENTATIONS.NEW_SYNTHETIC_PATH, 'images', filename)
+            # Save transformed image
+            output_filepath = os.path.join(cfg.AUGMENTATIONS.NEW_ROOT, cfg.AUGMENTATIONS.NEW_DATASET_NAME, 'synthetic', 'images', filename).replace('\\', '/')
             save_image(transformed_image, filepath = output_filepath)
-        except:
+        print('synthetic images augmented successfully')
+
+        # Copy train.json and validation.json files
+        print('copying synthetic labels to new folder...')
+        shutil.copy(os.path.join(cfg.DATASET.ROOT, cfg.DATASET.NAME, 'synthetic', 'train.json').replace('\\', '/'), os.path.join(cfg.AUGMENTATIONS.NEW_ROOT, cfg.AUGMENTATIONS.NEW_DATASET_NAME, 'synthetic', 'train.json').replace('\\', '/'))
+        shutil.copy(os.path.join(cfg.DATASET.ROOT, cfg.DATASET.NAME, 'synthetic', 'validation.json').replace('\\', '/'), os.path.join(cfg.AUGMENTATIONS.NEW_ROOT, cfg.AUGMENTATIONS.NEW_DATASET_NAME, 'synthetic', 'validation.json').replace('\\', '/'))
+        print('synthetic labels copied successfully')
+
+        # Copy camera.json
+        print('copying camera file to new folder...')
+        shutil.copy(os.path.join(cfg.DATASET.ROOT, cfg.DATASET.NAME, cfg.DATASET.CAMERA_FILE), os.path.join(cfg.AUGMENTATIONS.NEW_ROOT, cfg.AUGMENTATIONS.NEW_DATASET_NAME, cfg.DATASET.CAMERA_FILE))
+        print('camera file copied successfully')
+    # TODO: verify aws platform case
+    elif cfg.PLATFORM == 'aws':
+        for object, _ in zip(synthetic_image_objects, tqdm(range(1, len(synthetic_image_objects)), desc = 'augmenting synthetic images')):
+            # Load image
+            input_image = load_image_from_s3(cfg.DATASET.ROOT, object['Key'])
+
+            # Apply transformations
+            transformed_image = transforms(image = input_image)['image']
+
+            # Save transformed image
+            filename = os.path.basename(object['Key'])
             save_image_to_s3(transformed_image, cfg.DATASET.ROOT, os.path.join(cfg.AUGMENTATIONS.NEW_DATASET_NAME, 'synthetic', 'images', filename))
+        print('synthetic images augmented successfully')
+
+        # Copy train.json and validation.json files
+        print('copying synthetic labels to new folder...')
+        s3.meta.client.copy(train_labels_src, cfg.DATASET.ROOT, os.path.join(cfg.AUGMENTATIONS.NEW_DATASET_NAME, 'synthetic', 'train.json'))
+        s3.meta.client.copy(valid_labels_src, cfg.DATASET.ROOT, os.path.join(cfg.AUGMENTATIONS.NEW_DATASET_NAME, 'synthetic', 'validation.json'))
+        print('synthetic labels copied successfully')
+
+        # Copy camera.json
+        print('copying camera file to new folder...')
+        s3.meta.client.copy(camera_file_src, cfg.DATASET.ROOT, os.path.join(cfg.AUGMENTATIONS.NEW_DATASET_NAME, cfg.DATASET.CAMERA_FILE))
+        print('camera file copied successfully')
+
 
 if __name__ == '__main__':
     main(cfg)

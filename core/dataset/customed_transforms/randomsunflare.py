@@ -25,16 +25,18 @@ class RandomSunFlare(A.DualTransform):
     Args:
         flare_roi (float, float, float, float): region of the image where flare will
             appear (x_min, y_min, x_max, y_max). All values should be in range [0, 1].
-        angle_lower (float): should be in range [0, `angle_upper`].
-        angle_upper (float): should be in range [`angle_lower`, 1].
+        angle_lower (float): should be in range [0, 'angle_upper'].
+        angle_upper (float): should be in range ['angle_lower', 1].
         num_flare_circles_lower (int): lower limit for the number of flare circles.
-            Should be in range [0, `num_flare_circles_upper`].
+            Should be in range [0, 'num_flare_circles_upper'].
         num_flare_circles_upper (int): upper limit for the number of flare circles.
-            Should be in range [`num_flare_circles_lower`, inf].
+            Should be in range ['num_flare_circles_lower', inf].
         src_radius (int):
-        src_color ((int, int, int)): color of the flare
+        src_color ((int, int, int)): color of the flare.
+
     Targets:
         image
+        
     Image types:
         uint8, float32
 

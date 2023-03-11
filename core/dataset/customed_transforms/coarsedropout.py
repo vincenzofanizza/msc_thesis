@@ -29,21 +29,24 @@ class CoarseDropout(A.DualTransform):
         If float, it is calculated as a fraction of the image height.
         max_width (int, float): Maximum width of the hole.
         If float, it is calculated as a fraction of the image width.
-        min_holes (int): Minimum number of regions to zero out. If `None`,
-            `min_holes` is be set to `max_holes`. Default: `None`.
-        min_height (int, float): Minimum height of the hole. Default: None. If `None`,
-            `min_height` is set to `max_height`. Default: `None`.
+        min_holes (int): Minimum number of regions to zero out. If 'None',
+            'min_holes' is be set to 'max_holes'. Default: 'None'.
+        min_height (int, float): Minimum height of the hole. Default: None. If 'None',
+            'min_height' is set to 'max_height'. Default: 'None'.
             If float, it is calculated as a fraction of the image height.
-        min_width (int, float): Minimum width of the hole. If `None`, `min_height` is
-            set to `max_width`. Default: `None`.
+        min_width (int, float): Minimum width of the hole. If 'None', 'min_height' is
+            set to 'max_width'. Default: 'None'.
             If float, it is calculated as a fraction of the image width.
         fill_value (int, float, list of int, list of float): value for dropped pixels.
         mask_fill_value (int, float, list of int, list of float): fill value for dropped pixels
-            in mask. If `None` - mask is not affected. Default: `None`.
+            in mask. If 'None', mask is not affected. Default: 'None'.
+
     Targets:
         image, mask, keypoints
+
     Image types:
         uint8, float32
+        
     Reference:
     |  https://arxiv.org/abs/1708.04552
     |  https://github.com/uoguelph-mlrg/Cutout/blob/master/util/cutout.py
