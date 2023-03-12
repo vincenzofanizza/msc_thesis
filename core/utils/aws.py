@@ -80,26 +80,9 @@ def load_image_from_s3(bucket_name, filepath):
 
     return image
 
-def get_s3_keys_small(bucket_name, prefix):
+def get_all_s3_keys(bucket_name, prefix):
     """
-    Get a list of all keys in an S3 bucket folder containing up to 1,000 objects.
-    Note that this function would not get all bucket keys in case the bucket folder contains more than 1,000 objects (see Boto3 documentation for more details).
-
-    """
-    s3_client = boto3.client('s3')
-
-    keys = []
-
-    resp = s3_client.list_objects_v2(Bucket = bucket_name, Prefix = prefix)
-    for obj in resp['Contents']:
-        keys.append(obj['Key'])
-
-    return keys
-
-def get_s3_keys_large(bucket_name, prefix):
-    """
-    Get a list of all keys in an S3 bucket folder containing more than 1,000 objects.
-    Note that this function trows a KeyError in case the bucket folder contains no more than 1,000 objects (see Boto3 documentation for more details).
+    Get a list of all keys in an S3 bucket folder.
     
     Args: 
         bucket_name (str): Bucket to retrieve the keys from.
