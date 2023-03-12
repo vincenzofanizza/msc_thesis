@@ -3,7 +3,6 @@ Script containing aws-related utilities.
 
 '''
 import os
-import logging
 import boto3
 import cv2
 import numpy as np
@@ -22,17 +21,76 @@ def upload_file_to_s3(filepath, bucket_name, key):
         key (str): File path in the S3 bucket.
         
     Return: 
-        True if file was uploaded, False otherwise.
+        True if file was uploaded successfully.
 
     """
     s3_client = boto3.client('s3')
     try:
         s3_client.upload_file(Filename = filepath, Bucket = bucket_name, Key = key)
-    except ClientError as e:
-        logging.error(e)
-        return False
+    except:
+        raise ClientError('file upload was unsuccessful')
     
     return True
+
+def get_all_s3_keys(bucket_name, prefix):
+    """
+    Get a list of all keys in an S3 bucket containing more than 1,000 objects.
+    Note that this function trows a KeyError in case the bucket contains no more than 1,000 objects (see Boto3 documentation for more details).
+    
+    Args: 
+        bucket_name (str): Bucket to retrieve the keys from.
+        prefix (str): Key prefix.
+
+    Return:
+        bucket keys.
+    
+    Rtype:
+        list
+        
+    """
+    s3_client = boto3.client('s3')
+
+    keys = []
+    kwargs = {
+        'Bucket': bucket_name,
+        'Prefix': prefix
+    }
+
+    while True:
+        resp = s3_client.list_objects_v2(**kwargs)
+        for obj in resp['Contents']:
+            keys.append(obj['Key'])
+
+        print(keys)
+        try:
+            kwargs['ContinuationToken'] = resp['NextContinuationToken']
+        except:
+            raise KeyError('no continuation token found. It is likely that the bucket contains no more than 1,000 objects')
+
+    return keys
+
+def save_image_to_s3(image, bucket_name, filepath):
+    """
+    Save an image into an S3 bucket in jpg format.
+
+    Args:
+        image (numpy.array): Array containing the image in RGB format.
+        bucket (str): Name of the S3 bucket.
+
+    Return: 
+        True if the image was saved successfully.
+
+    """
+    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+    image_bytes = cv2.imencode('.jpg', image)[1].tobytes()
+
+    s3_client = boto3.client('s3')
+    try:
+        s3_client.put_object(Body = image_bytes, Bucket = bucket_name, Key = filepath, ContentType = 'image/JPG')
+    except:
+        raise ClientError('image was not saved successfully')
+    
+    return True    
 
 def load_image_from_s3(bucket_name, filepath):
     """
@@ -59,30 +117,6 @@ def load_image_from_s3(bucket_name, filepath):
 
     return image
 
-def save_image_to_s3(image, bucket_name, filepath):
-    """
-    Save an image into an S3 bucket.
-
-    Args:
-        image (numpy.array): Array containing the image in RGB format.
-        bucket (str): Name of the S3 bucket.
-
-    Return: 
-        True if the image was saved, False otherwise.
-
-    """
-    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-    image_bytes = cv2.imencode('.jpg', image)[1].tobytes()
-
-    s3_client = boto3.client('s3')
-    try:
-        s3_client.put_object(Body = image_bytes, Bucket = bucket_name, Key = filepath, ContentType = 'image/JPG')
-    except ClientError as e:
-        logging.error(e)
-        return False
-    
-    return True    
-
 def upload_speedplus_to_s3(speedplus_root, bucket_name):
     '''
     Upload SPEED+ to an S3 bucket.
@@ -93,7 +127,7 @@ def upload_speedplus_to_s3(speedplus_root, bucket_name):
         bucket_name (str): Name of the S3 bucket where SPEED+ will be uploaded. 
 
     Return:
-        True if the dataset was uploaded, False otherwise.
+        True if the dataset was uploaded successfully.
 
     '''
     # # Upload lightbox images with corresponding labels

@@ -14,7 +14,7 @@ import _add_root
 
 from core.dataset import SpeedplusAugmentCfg
 from core.run_config import cfg, update_config
-from core.utils.aws import load_image_from_s3, save_image_to_s3
+from core.utils.aws import load_image_from_s3, save_image_to_s3, get_all_s3_keys
 from core.utils.dataset import create_speedplus_folder_struc
 from core.utils.general import load_image, save_image
 
@@ -51,7 +51,7 @@ def main(cfg):
         s3 = boto3.resource('s3')
         s3_client = boto3.client('s3')
 
-        synthetic_image_objects = s3_client.list_objects_v2(Bucket = cfg.DATASET.ROOT, Prefix = os.path.join(cfg.DATASET.NAME, 'synthetic', 'images').replace('\\', '/'))
+        synthetic_image_keys = get_all_s3_keys(bucket_name = cfg.DATASET.ROOT, prefix = os.path.join(cfg.DATASET.NAME, 'synthetic', 'images').replace('\\', '/'))
         train_labels_src = {
             'Bucket': cfg.AUGMENTATIONS.NEW_ROOT,
             'Key': os.path.join(cfg.AUGMENTATIONS.NEW_DATASET_NAME, 'synthetic', 'test.json').replace('\\', '/')
@@ -75,7 +75,7 @@ def main(cfg):
     transforms = augment_cfg.build_transforms(is_train = True, to_tensor = False, load_labels = False)
 
     if cfg.PLATFORM == 'local':
-        print('getting dataset files at the local path: {} ...'.format(os.path.join(cfg.DATASET.ROOT, cfg.DATASET.NAME).replace('\\', '/')))
+        print("getting dataset files at the local path: '{}' ...".format(os.path.join(cfg.DATASET.ROOT, cfg.DATASET.NAME).replace('\\', '/')))
         for filename, _ in zip(synthetic_image_filenames, tqdm(range(1, len(synthetic_image_filenames) + 1), desc = 'augmenting synthetic images')):
             # Load image
             input_filepath = os.path.join(cfg.DATASET.ROOT, cfg.DATASET.NAME, 'synthetic', 'images', filename).replace('\\', '/')
@@ -99,11 +99,10 @@ def main(cfg):
         print('copying camera file to new folder...')
         shutil.copy(os.path.join(cfg.DATASET.ROOT, cfg.DATASET.NAME, cfg.DATASET.CAMERA_FILE), os.path.join(cfg.AUGMENTATIONS.NEW_ROOT, cfg.AUGMENTATIONS.NEW_DATASET_NAME, cfg.DATASET.CAMERA_FILE))
         print('camera file copied successfully')
-    # TODO: verify aws platform case
     elif cfg.PLATFORM == 'aws':
-        print('getting dataset files from the S3 folder: {} ...'.format(os.path.join(cfg.DATASET.ROOT, cfg.DATASET.NAME).replace('\\', '/')))
-        for object, _ in zip(synthetic_image_objects, tqdm(range(1, len(synthetic_image_objects) + 1), desc = 'augmenting synthetic images')):
-            print(object['Key'])
+        print("getting dataset files from the S3 bucket '{}' at the folder '{}' ...".format(cfg.DATASET.ROOT, cfg.DATASET.NAME))
+        for key, _ in zip(synthetic_image_keys, tqdm(range(1, len(synthetic_image_keys) + 1), desc = 'augmenting synthetic images')):
+            print(key)
             # Load image
             # TODO: verify the image is in RGB format and not BGR
             # input_image = load_image_from_s3(cfg.DATASET.ROOT, object['Key'])
