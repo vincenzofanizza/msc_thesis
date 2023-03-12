@@ -32,43 +32,6 @@ def upload_file_to_s3(filepath, bucket_name, key):
     
     return True
 
-def get_all_s3_keys(bucket_name, prefix):
-    """
-    Get a list of all keys in an S3 bucket containing more than 1,000 objects.
-    Note that this function trows a KeyError in case the bucket contains no more than 1,000 objects (see Boto3 documentation for more details).
-    
-    Args: 
-        bucket_name (str): Bucket to retrieve the keys from.
-        prefix (str): Key prefix.
-
-    Return:
-        bucket keys.
-    
-    Rtype:
-        list
-        
-    """
-    s3_client = boto3.client('s3')
-
-    keys = []
-    kwargs = {
-        'Bucket': bucket_name,
-        'Prefix': prefix
-    }
-
-    while True:
-        resp = s3_client.list_objects_v2(**kwargs)
-        for obj in resp['Contents']:
-            keys.append(obj['Key'])
-
-        print(keys)
-        try:
-            kwargs['ContinuationToken'] = resp['NextContinuationToken']
-        except:
-            raise KeyError('no continuation token found. It is likely that the bucket contains no more than 1,000 objects')
-
-    return keys
-
 def save_image_to_s3(image, bucket_name, filepath):
     """
     Save an image into an S3 bucket in jpg format.
@@ -116,6 +79,58 @@ def load_image_from_s3(bucket_name, filepath):
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
     return image
+
+def get_s3_keys_small(bucket_name, prefix):
+    """
+    Get a list of all keys in an S3 bucket folder containing up to 1,000 objects.
+    Note that this function would not get all bucket keys in case the bucket folder contains more than 1,000 objects (see Boto3 documentation for more details).
+
+    """
+    s3_client = boto3.client('s3')
+
+    keys = []
+
+    resp = s3_client.list_objects_v2(Bucket = bucket_name, Prefix = prefix)
+    for obj in resp['Contents']:
+        keys.append(obj['Key'])
+
+    return keys
+
+def get_s3_keys_large(bucket_name, prefix):
+    """
+    Get a list of all keys in an S3 bucket folder containing more than 1,000 objects.
+    Note that this function trows a KeyError in case the bucket folder contains no more than 1,000 objects (see Boto3 documentation for more details).
+    
+    Args: 
+        bucket_name (str): Bucket to retrieve the keys from.
+        prefix (str): Key prefix.
+
+    Return:
+        bucket keys.
+    
+    Rtype:
+        list
+        
+    """
+    s3_client = boto3.client('s3')
+
+    keys = []
+    kwargs = {
+        'Bucket': bucket_name,
+        'Prefix': prefix
+    }
+
+    while True:
+        resp = s3_client.list_objects_v2(**kwargs)
+        for obj in resp['Contents']:
+            keys.append(obj['Key'])
+
+        try:
+            kwargs['ContinuationToken'] = resp['NextContinuationToken']
+        except:
+            raise KeyError('no continuation token found. It is likely that the bucket contains no more than 1,000 objects')
+
+    return keys
 
 def upload_speedplus_to_s3(speedplus_root, bucket_name):
     '''

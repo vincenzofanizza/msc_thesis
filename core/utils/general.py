@@ -4,11 +4,18 @@ Script containing general utilities.
 '''
 import pandas as pd
 import cv2
+import random
 
+def set_seed(seed):
+    '''
+    Set random seed.
+
+    '''
+    random.seed(seed)
 
 def dict_to_csv(dict, filepath):
     '''
-    Save dictionary as .csv using pandas.
+    Save dictionary as csv using pandas.
 
     '''
     df = pd.DataFrame.from_dict(dict)
