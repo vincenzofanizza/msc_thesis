@@ -1,14 +1,14 @@
 PLATFORM: 'aws'
-ROOT: 'shirt-dataset'
+ROOT: 'speedplus-dataset'
 OUTPUT_DIR: 'speedplus_augmented_0'
 DATASET:
-  ROOT: 'shirt-dataset'
+  ROOT: 'speedplus-dataset'
   NAME: 'speedplusv2'
   CAMERA_FILE: 'camera.json'
 AUGMENTATIONS:
-  NEW_ROOT: 'shirt-dataset'
+  NEW_ROOT: 'speedplus-dataset'
   NEW_DATASET_NAME: 'speedplus_augmented_0'
-  P: 1.0
+  P: 0.5
   BRIGHTNESS_AND_CONTRAST: True
   BLUR: True
   NOISE: True
