@@ -5,8 +5,8 @@ Script containing classes and methods for the SPEED+ dataset.
 import albumentations as A
 from albumentations.pytorch.transforms import ToTensorV2
 
-from customed_transforms.randomsunflare import RandomSunFlare
-from customed_transforms.coarsedropout  import CoarseDropout
+from .customed_transforms.randomsunflare import RandomSunFlare
+from .customed_transforms.coarsedropout  import CoarseDropout
 
 
 class SpeedplusAugmentCfg:
