@@ -188,4 +188,4 @@ def save_image_to_s3(image, bucket_name, filepath):
 
 #         s3_client.put_object(Body = z.open(filename).read(), Bucket = S3_BUCKET, Key = f'{S3_UNZIPPED_FOLDER}{filename}') 
 
-upload_speedplus_to_s3("C:\\Users\\vinci\\OneDrive\\Desktop\\Thesis", 'speedplus-dataset')
+# upload_speedplus_to_s3("C:\\Users\\vinci\\OneDrive\\Desktop\\Thesis", 'speedplus-dataset')
