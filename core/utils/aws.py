@@ -127,8 +127,8 @@ def get_s3_keys_large(bucket_name, prefix):
 
         try:
             kwargs['ContinuationToken'] = resp['NextContinuationToken']
-        except:
-            raise KeyError('no continuation token found. It is likely that the bucket contains no more than 1,000 objects')
+        except KeyError:
+            break
 
     return keys
 
