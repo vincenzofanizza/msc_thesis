@@ -101,27 +101,28 @@ def main(cfg):
     # TODO: verify aws platform case
     elif cfg.PLATFORM == 'aws':
         for object, _ in zip(synthetic_image_objects, tqdm(range(1, len(synthetic_image_objects) + 1), desc = 'augmenting synthetic images')):
+            print(_)
             # Load image
             # TODO: verify the image is in RGB format and not BGR
-            input_image = load_image_from_s3(cfg.DATASET.ROOT, object['Key'])
+            # input_image = load_image_from_s3(cfg.DATASET.ROOT, object['Key'])
 
             # Apply transformations
-            transformed_image = transforms(image = input_image)['image']
+            # transformed_image = transforms(image = input_image)['image']
 
             # Save transformed image
-            filename = os.path.basename(object['Key'])
-            save_image_to_s3(transformed_image, cfg.DATASET.ROOT, os.path.join(cfg.AUGMENTATIONS.NEW_DATASET_NAME, 'synthetic', 'images', filename))
+            # filename = os.path.basename(object['Key'])
+            # save_image_to_s3(transformed_image, cfg.DATASET.ROOT, os.path.join(cfg.AUGMENTATIONS.NEW_DATASET_NAME, 'synthetic', 'images', filename))
         print('synthetic images augmented successfully')
 
         # Copy train.json and validation.json files
         print('copying synthetic labels to new folder...')
-        s3.meta.client.copy(train_labels_src, cfg.DATASET.ROOT, os.path.join(cfg.AUGMENTATIONS.NEW_DATASET_NAME, 'synthetic', 'train.json'))
-        s3.meta.client.copy(valid_labels_src, cfg.DATASET.ROOT, os.path.join(cfg.AUGMENTATIONS.NEW_DATASET_NAME, 'synthetic', 'validation.json'))
+        # s3.meta.client.copy(train_labels_src, cfg.DATASET.ROOT, os.path.join(cfg.AUGMENTATIONS.NEW_DATASET_NAME, 'synthetic', 'train.json'))
+        # s3.meta.client.copy(valid_labels_src, cfg.DATASET.ROOT, os.path.join(cfg.AUGMENTATIONS.NEW_DATASET_NAME, 'synthetic', 'validation.json'))
         print('synthetic labels copied successfully')
 
         # Copy camera.json
-        print('copying camera file to new folder...')
-        s3.meta.client.copy(camera_file_src, cfg.DATASET.ROOT, os.path.join(cfg.AUGMENTATIONS.NEW_DATASET_NAME, cfg.DATASET.CAMERA_FILE))
+        # print('copying camera file to new folder...')
+        # s3.meta.client.copy(camera_file_src, cfg.DATASET.ROOT, os.path.join(cfg.AUGMENTATIONS.NEW_DATASET_NAME, cfg.DATASET.CAMERA_FILE))
         print('camera file copied successfully')
 
 

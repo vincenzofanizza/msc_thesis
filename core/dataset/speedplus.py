@@ -2,11 +2,14 @@
 Script containing classes and methods for the SPEED+ dataset.
 
 '''
+import os
 import albumentations as A
 from albumentations.pytorch.transforms import ToTensorV2
+from tqdm import tqdm
 
 from .customed_transforms.randomsunflare import RandomSunFlare
 from .customed_transforms.coarsedropout  import CoarseDropout
+from utils.aws import upload_file_to_s3
 
 
 class SpeedplusAugmentCfg:
@@ -96,3 +99,82 @@ class SpeedplusAugmentCfg:
             )
 
         return transforms
+
+def upload_speedplus_to_s3(speedplus_root, bucket_name):
+    '''
+    Upload SPEED+ to an S3 bucket.
+    Note that calling this function uploads each file of the SPEED+ dataset to an S3 bucket individually, meaning it takes hours to complete.
+
+    Args:
+        speedplus_root (str): Root folder containing the SPEED+ dataset.
+        bucket_name (str): Name of the S3 bucket where SPEED+ will be uploaded. 
+
+    Return:
+        True if the dataset was uploaded, False otherwise.
+
+    '''
+    # # Upload lightbox images with corresponding labels
+    # lightbox_path = os.path.join('speedplusv2', 'lightbox').replace('\\', '/')
+
+    # lightbox_image_root = os.path.join(lightbox_path, 'images').replace('\\', '/')
+    # lightbox_filenames = os.listdir(os.path.join(speedplus_root, lightbox_image_root).replace('\\', '/'))
+    # for image_filename, _ in zip(lightbox_filenames, tqdm(range(1, len(lightbox_filenames) + 1), desc = 'uploading lightbox images')):
+    #     upload_file_to_s3(filepath = os.path.join(speedplus_root, lightbox_image_root, image_filename).replace('\\', '/'),
+    #                     bucket_name = bucket_name, 
+    #                     key = os.path.join(lightbox_image_root, image_filename).replace('\\', '/'))
+    # print('lightbox images uploaded successfully')
+
+    # print('uploading lightbox labels...')
+    # upload_file_to_s3(filepath = os.path.join(speedplus_root, lightbox_path, 'test.json').replace('\\', '/'), 
+    #             bucket_name = bucket_name, 
+    #             key = os.path.join(lightbox_path, 'test.json').replace('\\', '/'))
+    # print('lightbox labels uploaded successfully')
+        
+    # # Upload sunlamp images with corresponding labels
+    # sunlamp_path = os.path.join('speedplusv2', 'sunlamp').replace('\\', '/')
+    
+    # sunlamp_image_root = os.path.join(sunlamp_path, 'images').replace('\\', '/')
+    # sunlamp_filenames = os.listdir(os.path.join(speedplus_root, sunlamp_image_root).replace('\\', '/'))
+    # for image_filename, _ in zip(sunlamp_filenames, tqdm(range(1, len(sunlamp_filenames) + 1), desc = 'uploading sunlamp images')):
+    #     upload_file_to_s3(filepath = os.path.join(speedplus_root, sunlamp_image_root, image_filename).replace('\\', '/'),
+    #                     bucket_name = bucket_name, 
+    #                     key = os.path.join(sunlamp_image_root, image_filename).replace('\\', '/'))
+    # print('sunlamp images uploaded successfully')
+
+    # print('uploading sunlamp labels...')
+    # upload_file_to_s3(filepath = os.path.join(speedplus_root, sunlamp_path, 'test.json').replace('\\', '/'), 
+    #                 bucket_name = bucket_name, 
+    #                 key = os.path.join(sunlamp_path, 'test.json').replace('\\', '/'))
+    # print('sunlamp labels uploaded successfully')
+
+    # Upload synthetic images with corresponding labels
+    synthetic_path = os.path.join('speedplusv2', 'synthetic').replace('\\', '/')
+        
+    synthetic_image_root = os.path.join(synthetic_path, 'images').replace('\\', '/')
+    synthetic_filenames = os.listdir(os.path.join(speedplus_root, synthetic_image_root).replace('\\', '/'))
+    for image_filename, _ in zip(synthetic_filenames, tqdm(range(1, len(synthetic_filenames) + 1), desc = 'uploading synthetic images')):
+        upload_file_to_s3(filepath = os.path.join(speedplus_root, synthetic_image_root, image_filename).replace('\\', '/'),
+                        bucket_name = bucket_name, 
+                        key = os.path.join(synthetic_image_root, image_filename).replace('\\', '/'))
+    print('synthetic images uploaded successfully')
+
+    print('uploading synthetic labels...')
+    upload_file_to_s3(filepath = os.path.join(speedplus_root, synthetic_path, 'train.json').replace('\\', '/'), 
+                    bucket_name = bucket_name, 
+                    key = os.path.join(synthetic_path, 'train.json').replace('\\', '/'))
+    upload_file_to_s3(filepath = os.path.join(speedplus_root, synthetic_path, 'validation.json').replace('\\', '/'), 
+                    bucket_name = bucket_name, 
+                    key = os.path.join(synthetic_path, 'validation.json').replace('\\', '/'))
+    print('synthetic labels updated successfully')
+
+    # Upload camera and license files
+    print('uploading camera and license files...')
+    upload_file_to_s3(filepath = os.path.join(speedplus_root, 'speedplusv2', 'camera.json').replace('\\', '/'), 
+                    bucket_name = bucket_name, 
+                    key = os.path.join('speedplusv2', 'camera.json').replace('\\', '/'))
+    upload_file_to_s3(filepath = os.path.join(speedplus_root, 'speedplusv2', 'LICENSE.md').replace('\\', '/'), 
+                    bucket_name = bucket_name, 
+                    key = os.path.join('speedplusv2', 'LICENSE.md').replace('\\', '/'))
+    print('camera and license files updated successfully')
+
+    return True
