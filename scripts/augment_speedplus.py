@@ -32,6 +32,7 @@ def parse_args():
                         type = str)
     return parser.parse_args()
 
+# TODO: set random seed
 def main(cfg):
     '''
     Augment SPEED+ using a configuration object.
@@ -74,7 +75,7 @@ def main(cfg):
     transforms = augment_cfg.build_transforms(is_train = True, to_tensor = False, load_labels = False)
 
     if cfg.PLATFORM == 'local':
-        for filename, _ in zip(synthetic_image_filenames, tqdm(range(1, len(synthetic_image_filenames)), desc = 'augmenting synthetic images')):
+        for filename, _ in zip(synthetic_image_filenames, tqdm(range(1, len(synthetic_image_filenames) + 1), desc = 'augmenting synthetic images')):
             # Load image
             input_filepath = os.path.join(cfg.DATASET.ROOT, cfg.DATASET.NAME, 'synthetic', 'images', filename).replace('\\', '/')
             input_image = load_image(filepath = input_filepath)
@@ -99,8 +100,9 @@ def main(cfg):
         print('camera file copied successfully')
     # TODO: verify aws platform case
     elif cfg.PLATFORM == 'aws':
-        for object, _ in zip(synthetic_image_objects, tqdm(range(1, len(synthetic_image_objects)), desc = 'augmenting synthetic images')):
+        for object, _ in zip(synthetic_image_objects, tqdm(range(1, len(synthetic_image_objects) + 1), desc = 'augmenting synthetic images')):
             # Load image
+            # TODO: verify the image is in RGB format and not BGR
             input_image = load_image_from_s3(cfg.DATASET.ROOT, object['Key'])
 
             # Apply transformations
