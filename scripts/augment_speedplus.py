@@ -14,7 +14,7 @@ import _add_root
 
 from core.dataset import SpeedplusAugmentCfg
 from core.run_config import cfg, update_config
-from core.utils.aws import load_image_from_s3, save_image_to_s3, get_s3_keys_small
+from core.utils.aws import load_image_from_s3, save_image_to_s3, get_s3_keys_large
 from core.utils.dataset import create_speedplus_folder_struc
 from core.utils.general import load_image, save_image, set_seed
 
@@ -50,7 +50,7 @@ def main(cfg):
         create_speedplus_folder_struc(cfg)
         synthetic_image_filenames = os.listdir(os.path.join(cfg.DATASET.SYNTHETIC_PATH, 'images').replace('\\', '/'))
     elif cfg.PLATFORM == 'aws':
-        synthetic_image_keys = get_s3_keys_small(bucket_name = cfg.DATASET.ROOT, prefix = os.path.join(cfg.DATASET.NAME, 'synthetic', 'images', 'img').replace('\\', '/'))
+        synthetic_image_keys = get_s3_keys_large(bucket_name = cfg.DATASET.ROOT, prefix = os.path.join(cfg.DATASET.NAME, 'synthetic', 'images', 'img').replace('\\', '/'))
 
         s3_dst_bucket = boto3.resource('s3').Bucket(cfg.AUGMENTATIONS.NEW_ROOT)
         train_labels_src = {
