@@ -1,0 +1,45 @@
+# ------------------------------------------------------------------------------ #
+# Basic settings
+# ------------------------------------------------------------------------------ #
+PLATFORM: 'local'
+ROOT: 'C:/Users/vinci/OneDrive/Desktop/Thesis'
+OUTPUT_DIR: 'C:/Users/vinci/OneDrive/Desktop/Thesis'
+
+# ------------------------------------------------------------------------------ #
+# Model settings
+# ------------------------------------------------------------------------------ #
+MODEL:
+  TYPE: 'KD'
+  NUM_KEYPOINTS: 11
+  NUM_CLASSES: 5000
+  NUM_NEIGHBORS: 5
+
+# ------------------------------------------------------------------------------ #
+# Dataset-related parameters
+# ------------------------------------------------------------------------------ #
+DATASET:
+  ROOT: 'C:/Users/vinci/OneDrive/Desktop/Thesis'
+  NAME: 'speedplusv2'
+  CAMERA_FILE: 'camera.json'
+  TRAIN:
+    DOMAIN: 'synthetic'
+    CSV: 'train.csv'
+  VALIDATION:
+    DOMAIN: 'synthetic'
+    CSV: 'validation.csv'
+  TEST: 
+    DOMAIN: 'sunlamp'
+    CSV: 'test.csv'
+
+# ------------------------------------------------------------------------------ #
+# Data augmentation
+# ------------------------------------------------------------------------------ #
+AUGMENTATIONS:
+  NEW_ROOT: 'C:/Users/vinci/OneDrive/Desktop/Thesis'
+  NEW_DATASET_NAME: 'speedplus_augmented_0'
+  P: 0.0
+  BRIGHTNESS_AND_CONTRAST: False
+  BLUR: False
+  NOISE: False
+  ERASING: False
+  SUN_FLARE: False

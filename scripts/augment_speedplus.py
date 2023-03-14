@@ -48,7 +48,7 @@ def main(cfg):
 
     if cfg.PLATFORM == 'local':
         create_speedplus_folder_struc(cfg)
-        synthetic_image_filenames = os.listdir(os.path.join(cfg.DATASET.SYNTHETIC_PATH, 'images').replace('\\', '/'))
+        synthetic_image_filenames = os.listdir(os.path.join(cfg.DATASET.ROOT, cfg.DATASET.NAME, 'synthetic').replace('\\', '/'))
     elif cfg.PLATFORM == 'aws':
         synthetic_image_keys = get_all_s3_keys(bucket_name = cfg.DATASET.ROOT, prefix = os.path.join(cfg.DATASET.NAME, 'synthetic', 'images', 'img').replace('\\', '/'))
 
