@@ -5,10 +5,6 @@ The function below is adopted from the Albumentation's official implementation o
 It is modified to accept the bounding box as an input to force the dropout regions within the prescribed bounding box.
 
 '''
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 from typing import Optional, Tuple, Iterable, Union
 
 import random

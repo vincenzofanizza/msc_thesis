@@ -3,6 +3,7 @@ Script containing classes and methods for the SPEED+ dataset.
 
 '''
 import os
+import cv2
 import logging
 import numpy as np
 import pandas as pd
@@ -12,9 +13,8 @@ import albumentations as A
 from torch.utils.data import Dataset
 from albumentations.pytorch.transforms import ToTensorV2
 
-from .customed_transforms.randomsunflare import RandomSunFlare
-from .customed_transforms.coarsedropout  import CoarseDropout
-from core.utils.general import load_image
+from customed_transforms.randomsunflare import RandomSunFlare
+from customed_transforms.coarsedropout  import CoarseDropout
 
 
 logger = logging.getLogger(__name__)
@@ -42,16 +42,16 @@ class ObjDetDataset(Dataset):
 
         if is_train:
             # Source domain - train
-            csvfile = os.path.join(self.root, self.name, cfg.TRAIN.DOMAIN, cfg.TRAIN.CSV)
+            csv_filepath = os.path.join(self.root, self.name, cfg.TRAIN.DOMAIN, cfg.TRAIN.CSV)
         else:
-            csvfile = os.path.join(self.root, self.name, cfg.TEST.DOMAIN, cfg.TEST.CSV)
+            csv_filepath = os.path.join(self.root, self.name, cfg.TEST.DOMAIN, cfg.TEST.CSV)
 
         logger.info('{} from {}'.format(
-            'Training' if is_train else 'Testing', csvfile
+            'Training' if is_train else 'Testing', csv_filepath
         ))
 
         # Read CSV file
-        self.csv = pd.read_csv(csvfile, header = None)
+        self.csv = pd.read_csv(csv_filepath, header = None)
 
         # Image transforms
         self.transforms = transforms
@@ -60,41 +60,31 @@ class ObjDetDataset(Dataset):
         return len(self.csv)
 
     def __getitem__(self, index):
-        if index < len(self):
-            raise AssertionError('Index range error')
+        if index >= len(self):
+            raise IndexError('the index provided is out of range')
 
         # Read Image & Bbox
-        # TODO: Update indeces with actual csv file configuration
+        # TODO: Update indeces with actual csv file configuration (if necessary)
         image_path = os.path.join(self.root, self.name, self.csv.iloc[index, 0])
-        data    = load_image(image_path)
-        bbox    = np.array(self.csv.iloc[index, 1:5], dtype = np.float32)
+        image = cv2.imread(image_path)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        bbox = np.array(self.csv.iloc[index, 1:5], dtype = np.float32)
+        keypts  = np.zeros((2, 11))  # dummy
 
         # Data transform
-        if self.transforms is not None:
-            data = self.transforms(data)
+        image, bbox, _ = self.transforms(image, bbox, keypts)
 
-        # Return classes & weights (train) or pose (test)
-        if self.is_train:
-            attClasses = np.array(self.csv.iloc[index, 12:12 + self.num_neighbors], dtype = np.int32)
-            attWeights = np.array(self.csv.iloc[index, 12 + self.num_neighbors:], dtype = np.float32)
+        # Return image and corresponding label
+        item = {
+            'Image': image,
+            'Bbox': bbox
+        }
 
-            # Classes into n-hot vector
-            yClasses = np.zeros(self.num_classes, dtype = np.float32)
-            yClasses[attClasses] = 1. / self.num_neighbors
-
-            # Weights into n-hot vector as well
-            yWeights = np.zeros(self.num_classes, dtype = np.float32)
-            yWeights[attClasses] = attWeights
-
-            return data, torch.from_numpy(yClasses), torch.from_numpy(yWeights)
-        else:
-            q_gt = np.array(self.csv.iloc[index, 5:9],  dtype=np.float32)
-            t_gt = np.array(self.csv.iloc[index, 9:12], dtype=np.float32)
-            return data, bbox, torch.from_numpy(q_gt), torch.from_numpy(t_gt)
+        return item
         
 class KeyDetDataset(Dataset):
     """ 
-    Code taken from the SPPED+ baseline repository: https://github.com/tpark94/speedplusbaseline.
+    Code taken from the SPEED+ baseline repository: https://github.com/tpark94/speedplusbaseline.
 
     Class that defines the KD dataset object.
     
@@ -105,26 +95,24 @@ class KeyDetDataset(Dataset):
     Keypoint Coord.:   kx1, ky1, ..., kx11, ky11  [pix]
 
     """
-    def __init__(self, cfg, transforms = None, is_train = True, load_labels = True):
+    def __init__(self, cfg, transforms = None, is_train = True):
         self.is_train = is_train
-        self.load_labels = load_labels
         self.root = cfg.DATASET.ROOT
         self.name = cfg.DATASET.NAME
-        # TODO: include num_keypoints in configuration file
         self.num_keypts  = cfg.NUM_KEYPOINTS
 
         if is_train:
             # Source domain - train
-            csvfile = os.path.join(self.root, self.name, cfg.TRAIN.DOMAIN, cfg.TRAIN.CSV)
+            csv_filepath = os.path.join(self.root, self.name, cfg.TRAIN.DOMAIN, cfg.TRAIN.CSV)
         else:
-            csvfile = os.path.join(self.root, self.name, cfg.TEST.DOMAIN, cfg.TEST.CSV)
+            csv_filepath = os.path.join(self.root, self.name, cfg.TEST.DOMAIN, cfg.TEST.CSV)
 
         logger.info('{} from {}'.format(
-            'Training' if is_train else 'Testing', csvfile
+            'Training' if is_train else 'Testing', csv_filepath
         ))
 
         # Read CSV file
-        self.csv = pd.read_csv(csvfile, header=None)
+        self.csv = pd.read_csv(csv_filepath, header = None)
 
         # Image transforms
         self.transforms = transforms
@@ -133,35 +121,29 @@ class KeyDetDataset(Dataset):
         return len(self.csv)
 
     def __getitem__(self, index):
-        if index < len(self):
-            raise AssertionError('Index range error')
+        if index >= len(self):
+            raise IndexError('the index provided is out of range')
 
         # Read Images & Bbox
         image_path = os.path.join(self.root, self.csv.iloc[index, 0])
-        data    = load_image(image_path)
-        bbox    = np.array(self.csv.iloc[index, 1:5], dtype = np.float32)
+        image = cv2.imread(image_path)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)      
+        bbox = np.array(self.csv.iloc[index, 1:5], dtype = np.float32)
 
         # Load keypoints
-        if self.is_train and self.load_labels:
-            keypts = np.array(self.csv.iloc[index, 12:], dtype = np.float32)   # [22,]
-            keypts = np.transpose(np.reshape(keypts, (self.num_keypts, 2)))  # [2 x 11]
-        else:
-            keypts = np.zeros((2, self.num_keypts))
+        keypts = np.array(self.csv.iloc[index, 12:], dtype = np.float32)  # [22,]
+        keypts = np.transpose(np.reshape(keypts, (self.num_keypts, 2)))  # [2 x 11]
 
         # Data transform
-        if self.transforms is not None:
-            data = self.transforms(data)
+        image, bbox, _ = self.transforms(image, bbox, keypts)
 
-        # Return keypoints (train) or pose (test)
-        if self.is_train:
-            if self.load_labels:
-                return data, keypts
-            else:
-                return data
-        else:
-            q_gt = np.array(self.csv.iloc[index, 5:9],  dtype=np.float32)
-            t_gt = np.array(self.csv.iloc[index, 9:12], dtype=np.float32)
-            return data, bbox, torch.from_numpy(q_gt), torch.from_numpy(t_gt)
+        # Return image and corresponding label
+        item = {
+            'Image': image,
+            'Keypts': torch.from_numpy(keypts)
+        }
+
+        return item
 
 class SpeedplusAugmentCfg:
     '''
@@ -170,15 +152,15 @@ class SpeedplusAugmentCfg:
     Class that defines the SPEED+ augmentation configuration.
     
     '''
-    def __init__(self, p = 0.5, brightness_and_contrast = False, blur = False, noise = False, erasing = False, sun_flare = False):
-        self.p = p
-        self.apply_brightness_and_contrast = brightness_and_contrast
-        self.apply_blur = blur
-        self.apply_noise = noise
-        self.apply_erasing = erasing
-        self.apply_sun_flare = sun_flare
+    def __init__(self, cfg):
+        self.p = cfg.AUGMENTATIONS.P
+        self.brightness_and_contrast = cfg.AUGMENTATIONS.BRIGHTNESS_AND_CONTRAST
+        self.blur = cfg.AUGMENTATIONS.BLUR
+        self.noise = cfg.AUGMENTATIONS.NOISE
+        self.erasing = cfg.AUGMENTATIONS.ERASING
+        self.sun_flare = cfg.AUGMENTATIONS.SUN_FLARE
 
-    def build_transforms(self, is_train = True, to_tensor = False, load_labels = True):
+    def build_transforms(self, is_train = True, load_labels = True):
         '''
         Build augmentation pipeline using albumentations.
 
@@ -201,11 +183,11 @@ class SpeedplusAugmentCfg:
 
         # Add augmentation if training, skip if not
         if is_train:
-            if self.apply_brightness_and_contrast:
+            if self.brightness_and_contrast:
                 transforms += [A.RandomBrightnessContrast(brightness_limit = 0.2,
                                                         contrast_limit = 0.2,
                                                         p = self.p)]
-            if self.apply_blur:
+            if self.blur:
                 transforms += [A.OneOf(
                     [
                         A.MotionBlur(blur_limit = (3,9)),
@@ -214,7 +196,7 @@ class SpeedplusAugmentCfg:
                                     max_delta = 2)
                     ], p = self.p
                 )]
-            if self.apply_noise:
+            if self.noise:
                 transforms += [A.OneOf(
                     [
                         A.GaussNoise(var_limit = 40**2), # variance [pix]
@@ -222,22 +204,24 @@ class SpeedplusAugmentCfg:
                                 intensity = (0.5, 1.0))
                     ], p = self.p
                 )]
-            if self.apply_erasing:
+            if self.erasing:
                 transforms += [CoarseDropout(max_holes = 5,
                                             min_holes = 1,
                                             max_ratio = 0.5,
                                             min_ratio = 0.2,
                                             p = self.p)]
-            if self.apply_sun_flare:
+            if self.sun_flare:
                 transforms += [RandomSunFlare(num_flare_circles_lower = 1,
                                             num_flare_circles_upper = 10,
                                             p = self.p)]
-            # TODO: include other augmentations (style randomisation, haze, stars, streaks, Earth background)
-        if to_tensor:
-            # Normalize by ImageNet stats, then turn into tensor
-            transforms += [A.Normalize(mean = (0.485, 0.456, 0.406), std = (0.229, 0.224, 0.225)),
-                        ToTensorV2()]
+        # TODO: include other augmentations (style randomisation, haze, stars, streaks, Earth background)
+
+        # Normalize by ImageNet stats, then turn into tensor
+        transforms += [A.Normalize(mean = (0.485, 0.456, 0.406), std = (0.229, 0.224, 0.225)),
+                    ToTensorV2()]
+
         # Compose and return
+        # TODO: don't we need keypoint labels as well?
         if load_labels:
             transforms = A.Compose(
                 transforms,
@@ -249,6 +233,4 @@ class SpeedplusAugmentCfg:
                 transforms
             )
 
-        return transform
-    
-def make_dataloader():
+        return transforms

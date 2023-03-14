@@ -1,10 +1,30 @@
+# ------------------------------------------------------------------------------ #
+# Basic settings
+# ------------------------------------------------------------------------------ #
 PLATFORM: 'aws'
 ROOT: 'speedplus-dataset'
 OUTPUT_DIR: 'speedplus_augmented_0'
+
+# ------------------------------------------------------------------------------ #
+# Dataset-related parameters
+# ------------------------------------------------------------------------------ #
 DATASET:
   ROOT: 'speedplus-dataset'
   NAME: 'speedplusv2'
   CAMERA_FILE: 'camera.json'
+  TRAIN:
+    DOMAIN: 'synthetic'
+    CSV: 'train.csv'
+  VALIDATION:
+    DOMAIN: 'synthetic'
+    CSV: 'validation.csv'
+  TEST: 
+    DOMAIN: 'sunlamp'
+    CSV: 'test.csv'
+
+# ------------------------------------------------------------------------------ #
+# Data augmentation
+# ------------------------------------------------------------------------------ #
 AUGMENTATIONS:
   NEW_ROOT: 'speedplus-dataset'
   NEW_DATASET_NAME: 'speedplus_augmented_0'

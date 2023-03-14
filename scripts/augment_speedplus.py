@@ -13,7 +13,7 @@ from tqdm import tqdm
 import _add_root
 
 from core.dataset import SpeedplusAugmentCfg
-from core.run_config import cfg, update_config
+from core.config import cfg, update_config
 from core.utils.aws import load_image_from_s3, save_image_to_s3, get_all_s3_keys
 from core.utils.dataset import create_speedplus_folder_struc
 from core.utils.general import load_image, save_image, set_seed
@@ -32,7 +32,6 @@ def parse_args():
                         type = str)
     return parser.parse_args()
 
-# TODO: set random seed
 def main(cfg):
     '''
     Augment SPEED+ using a configuration object.
